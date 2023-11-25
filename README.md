@@ -12,5 +12,10 @@ g++ -o i2c_send main.cpp -li2c
 
 Usage:
 ```
-./i2c_send <value1> <value2>
+./i2c_send <valueMotorLeft> <valueMotorRight>
+```
+
+Example:
+```
+./i2c_send 100 -100
 ```
