@@ -19,3 +19,7 @@ Example:
 ```
 ./i2c_send 100 -100
 ```
+
+Useful links:
+- https://www.kernel.org/doc/Documentation/i2c/dev-interface
+- https://stackoverflow.com/questions/57836694/i2c-mistake-i2c-smbus-read-byte-data-was-not-declared-in-this-scope
