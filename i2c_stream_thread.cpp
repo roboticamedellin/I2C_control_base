@@ -27,15 +27,14 @@ void send_stream_data(int16_t vel_l, int16_t vel_r, int duration_seconds) {
     }
 
     unsigned char payload[5];
-    payload[0] = 0x55; // mode
+    payload[0] = 0x55; // stream mode
     payload[1] = (vel_l >> 8) & 0xFF;
     payload[2] = vel_l & 0xFF;
     payload[3] = (vel_r >> 8) & 0xFF;
     payload[4] = vel_r & 0xFF;
 
-    // prepend dummy register byte (0x00), total = 6 bytes
     unsigned char buffer[6];
-    buffer[0] = 0x00; // dummy register (ESP32 ignores this)
+    buffer[0] = 0x00; // dummy register
     memcpy(&buffer[1], payload, 5);
 
     for (int i = 0; i < duration_seconds * 10; ++i) {
@@ -52,14 +51,19 @@ void send_stream_data(int16_t vel_l, int16_t vel_r, int duration_seconds) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <left_speed> <right_speed>\n";
+    if (argc < 3 || argc > 4) {
+        std::cerr << "Usage: " << argv[0] << " <left_speed> <right_speed> [duration_seconds]\n";
         return 1;
     }
 
     int16_t left_speed = static_cast<int16_t>(std::atoi(argv[1]));
     int16_t right_speed = static_cast<int16_t>(std::atoi(argv[2]));
-    int duration_seconds = 10;
+    int duration_seconds = 5; // default duration
+
+    if (argc == 4) {
+        duration_seconds = std::atoi(argv[3]);
+        if (duration_seconds <= 0) duration_seconds = 5;
+    }
 
     std::thread sender(send_stream_data, left_speed, right_speed, duration_seconds);
     sender.join();
