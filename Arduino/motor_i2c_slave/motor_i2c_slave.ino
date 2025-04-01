@@ -17,6 +17,10 @@ union {
   int16_t value;
 } vel_l, vel_r;
 
+uint8_t motorMode = 0x44;  // Default to continuous
+unsigned long lastI2CReceiveTime = 0;
+const unsigned long TIMEOUT_MS = 500;
+
 ////////////////////// End I2C
 
 // Motors //////////////////////
@@ -30,7 +34,7 @@ const uint16_t PWMB = 26;
 
 const uint16_t ANALOG_WRITE_BITS = 8;
 
-int freq = 100000;
+int freq = 20000;
 int channel_A = 0;
 int channel_B = 1;
 int resolution = ANALOG_WRITE_BITS;
@@ -61,8 +65,6 @@ void motorL(int16_t value){
     digitalWrite(AIN2, LOW);
     pwm = static_cast<uint16_t>(value);
   }
-  // Serial.print("speedL: ");
-  // Serial.println(value);
   ledcWrite(channel_A, pwm);
 }
 
@@ -77,20 +79,17 @@ void motorR(int16_t value){
     digitalWrite(BIN2, LOW);
     pwm = static_cast<uint16_t>(value);
   }
-  // Serial.print("speedR: ");
-  // Serial.println(value);
   ledcWrite(channel_B, pwm);
 }
 
-////////////////////// End Motors
-
 void moveF(int16_t vel_l, int16_t vel_r){
-  // motors.setSpeeds(vel_l, vel_r);
   motorL(vel_l);
   motorR(vel_r);
 }
 
-// void receiveData(int byteCount);
+void stopMotors(){
+  moveF(0, 0);
+}
 
 void setup() {
   initMotors();
@@ -99,47 +98,49 @@ void setup() {
   Wire.begin(I2C_SLAVE_ADDRESS, I2C_SDA, I2C_SCL, 0);
   Wire.onReceive(receiveData);
 
-  moveF(0, 0);
-
-  // motorSpeed.rightSpeed = 0;
-  // motorSpeed.leftSpeed  = 0;
-
-//  motors.flipRightMotor(true);
+  stopMotors();
 }
 
 void loop() {
-  // moveF(100, -100);
-  // delay(2000);
-  // moveF(-100, 100);
-  // delay(2000);
-  // moveF(0, 0);
-  // delay(2000);
-  moveF(motorSpeed.leftSpeed, motorSpeed.rightSpeed);
+  unsigned long now = millis();
+
+  if (motorMode == 0x44) {
+    moveF(motorSpeed.leftSpeed, motorSpeed.rightSpeed);
+  }
+  else if (motorMode == 0x55) {
+    if (now - lastI2CReceiveTime < TIMEOUT_MS) {
+      moveF(motorSpeed.leftSpeed, motorSpeed.rightSpeed);
+    } else {
+      stopMotors();
+    }
+  }
+
+  delay(50); // smoother control loop
 }
 
 // callback received data
 void receiveData(int byteCount) {
+  if (byteCount < 5) return;
 
-  Serial.print("byteCount: ");
-  Serial.println(byteCount);
-    
-  int8_t firstByte = Wire.read();
+  uint8_t discard = Wire.read(); // register byte from master
 
-  vel_l.raw[1] = (int8_t) Wire.read();
-  vel_l.raw[0] = (int8_t) Wire.read();
+  motorMode = Wire.read(); // mode: 0x44 or 0x55
 
-  vel_r.raw[1] = (int8_t) Wire.read();
-  vel_r.raw[0] = (int8_t) Wire.read();
+  vel_l.raw[1] = Wire.read();
+  vel_l.raw[0] = Wire.read();
+
+  vel_r.raw[1] = Wire.read();
+  vel_r.raw[0] = Wire.read();
 
   motorSpeed.leftSpeed = vel_l.value;
   motorSpeed.rightSpeed = vel_r.value;
 
-  Serial.print("firstByte: ");
-  Serial.println(firstByte);
+  lastI2CReceiveTime = millis(); // update last receive time
 
-  Serial.print("leftSpeed: ");
-  Serial.print(vel_l.value);
-  Serial.print("\t rightSpeed: ");
-  Serial.println(vel_r.value);
-  
+  Serial.print("Mode: 0x");
+  Serial.println(motorMode, HEX);
+  Serial.print("Left Speed: ");
+  Serial.print(motorSpeed.leftSpeed);
+  Serial.print("\tRight Speed: ");
+  Serial.println(motorSpeed.rightSpeed);
 }
