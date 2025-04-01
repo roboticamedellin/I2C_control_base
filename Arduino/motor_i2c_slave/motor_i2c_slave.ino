@@ -17,9 +17,9 @@ union {
   int16_t value;
 } vel_l, vel_r;
 
-uint8_t motorMode = 0x44;  // Default to continuous
+uint8_t motorMode = 0x00;  // Default to nothing
 unsigned long lastI2CReceiveTime = 0;
-const unsigned long TIMEOUT_MS = 500;
+const unsigned long TIMEOUT_MS = 300;
 
 ////////////////////// End I2C
 
@@ -34,7 +34,7 @@ const uint16_t PWMB = 26;
 
 const uint16_t ANALOG_WRITE_BITS = 8;
 
-int freq = 20000;
+int freq = 10000;
 int channel_A = 0;
 int channel_B = 1;
 int resolution = ANALOG_WRITE_BITS;
@@ -88,7 +88,13 @@ void moveF(int16_t vel_l, int16_t vel_r){
 }
 
 void stopMotors(){
-  moveF(0, 0);
+  ledcWrite(channel_A, 0);
+  ledcWrite(channel_B, 0);
+
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, LOW);
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, LOW);
 }
 
 void setup() {
@@ -107,11 +113,13 @@ void loop() {
   if (motorMode == 0x44) {
     moveF(motorSpeed.leftSpeed, motorSpeed.rightSpeed);
   }
-  else if (motorMode == 0x55) {
+  
+  if (motorMode == 0x55) {
     if (now - lastI2CReceiveTime < TIMEOUT_MS) {
       moveF(motorSpeed.leftSpeed, motorSpeed.rightSpeed);
     } else {
       stopMotors();
+      motorMode == 0x00; // Move to nothing
     }
   }
 
