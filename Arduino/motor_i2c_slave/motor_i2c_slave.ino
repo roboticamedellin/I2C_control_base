@@ -19,7 +19,7 @@ union {
 
 uint8_t motorMode = 0x00;  // Default to nothing
 unsigned long lastI2CReceiveTime = 0;
-const unsigned long TIMEOUT_MS = 300;
+const unsigned long TIMEOUT_MS = 500;
 
 ////////////////////// End I2C
 
