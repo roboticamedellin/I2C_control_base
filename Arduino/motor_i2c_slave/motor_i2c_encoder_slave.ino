@@ -93,13 +93,13 @@ void stopMotors() {
 
 // === Encoder Functions ===
 void IRAM_ATTR B_wheel_pulse() {
-  if (digitalRead(BENCA)) B_wheel_pulse_count++;
-  else B_wheel_pulse_count--;
+  if (digitalRead(BENCA)) B_wheel_pulse_count--;
+  else B_wheel_pulse_count++;
 }
 
 void IRAM_ATTR A_wheel_pulse() {
-  if (digitalRead(AENCA)) A_wheel_pulse_count++;
-  else A_wheel_pulse_count--;
+  if (digitalRead(AENCA)) A_wheel_pulse_count--;
+  else A_wheel_pulse_count++;
 }
 
 void initEncoders() {
