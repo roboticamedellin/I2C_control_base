@@ -19,7 +19,7 @@ sudo apt-get install i2c-tools libi2c-dev build-essential
 
 ## 🛠️ Compile
 ```bash
-g++ -o i2c_send main.cpp -li2c
+g++ -o i2c_send send_command.cpp -li2c
 g++ -o i2c_stream_thread i2c_stream_thread.cpp -li2c -pthread
 ```
 

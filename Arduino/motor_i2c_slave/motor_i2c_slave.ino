@@ -99,7 +99,7 @@ void stopMotors(){
 
 void setup() {
   initMotors();
-  Serial.begin(9600);
+  // Serial.begin(9600);
 
   Wire.begin(I2C_SLAVE_ADDRESS, I2C_SDA, I2C_SCL, 0);
   Wire.onReceive(receiveData);
@@ -123,7 +123,7 @@ void loop() {
     }
   }
 
-  delay(50); // smoother control loop
+  delay(10); // smoother control loop
 }
 
 // callback received data
@@ -145,10 +145,10 @@ void receiveData(int byteCount) {
 
   lastI2CReceiveTime = millis(); // update last receive time
 
-  Serial.print("Mode: 0x");
-  Serial.println(motorMode, HEX);
-  Serial.print("Left Speed: ");
-  Serial.print(motorSpeed.leftSpeed);
-  Serial.print("\tRight Speed: ");
-  Serial.println(motorSpeed.rightSpeed);
+  // Serial.print("Mode: 0x");
+  // Serial.println(motorMode, HEX);
+  // Serial.print("Left Speed: ");
+  // Serial.print(motorSpeed.leftSpeed);
+  // Serial.print("\tRight Speed: ");
+  // Serial.println(motorSpeed.rightSpeed);
 }
