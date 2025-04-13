@@ -12,26 +12,42 @@ There are two modes:
 Make sure you have the required libraries for I2C support:
 
 ```bash
-sudo apt-get install i2c-tools libi2c-dev build-essential
+sudo apt-get install i2c-tools libi2c-dev build-essential cmake
 ```
 
 ---
 
-## 🛠️ Compile
-```bash
-g++ -o i2c_send send_command.cpp -li2c
-g++ -o i2c_stream_thread i2c_stream_thread.cpp -li2c -pthread
-```
+## 🛠️ Build the project
+
+1. Create a build directory and navigate to it:
+   ```bash
+   mkdir build && cd build
+   ```
+
+2. Run `cmake` to configure the project:
+   ```bash
+   cmake ..
+   ```
+
+3. Compile the executables:
+   ```bash
+   make
+   ```
+
+This will generate the following executables in the `build` directory:
+- `read_encoder`
+- `send_command`
+- `stream_thread`
 
 ---
 
 ## 🚀 Usage
 
-### 🔹 `i2c_send`: Single command
+### 🔹 `send_command`: Single command
 Sends one motor command to the ESP32.
 
 ```bash
-./i2c_send <mode> <valueMotorLeft> <valueMotorRight>
+./send_command <mode> <valueMotorLeft> <valueMotorRight>
 ```
 
 - `<mode>` is a hex code (without the `0x`), e.g.:
@@ -40,22 +56,22 @@ Sends one motor command to the ESP32.
 
 #### Example: Continuous movement
 ```bash
-./i2c_send 44 100 -100
+./send_command 44 100 -100
 ```
 
 #### Example: One-shot movement
 ```bash
-./i2c_send 55 80 80
+./send_command 55 80 80
 ```
 
 ---
 
-### 🔹 `i2c_stream_thread`: Continuous streaming with optional duration
+### 🔹 `stream_thread`: Continuous streaming with optional duration
 
 Sends I2C commands every 100 ms using a separate thread for a fixed number of seconds.
 
 ```bash
-./i2c_stream_thread <valueMotorLeft> <valueMotorRight> [duration_seconds]
+./stream_thread <valueMotorLeft> <valueMotorRight> [duration_seconds]
 ```
 
 - The `duration_seconds` parameter is **optional**.
@@ -63,15 +79,25 @@ Sends I2C commands every 100 ms using a separate thread for a fixed number of se
 
 #### Example: Default 5 seconds
 ```bash
-./i2c_stream_thread 120 -120
+./stream_thread 120 -120
 ```
 
 #### Example: Custom 8-second stream
 ```bash
-./i2c_stream_thread 120 -120 8
+./stream_thread 120 -120 8
 ```
 
 > The ESP32 will automatically stop the motors if streaming stops (e.g., after timeout).
+
+---
+
+### 🔹 `read_encoder`: Read encoder values
+
+Reads and displays the encoder values from the ESP32.
+
+```bash
+./read_encoder
+```
 
 ---
 

@@ -27,6 +27,9 @@ int main() {
         return 1;
     }
 
+    // Wait for ESP32 to be ready
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     for (int i = 0; i < 10; ++i) {
         uint8_t buffer[4];
 
@@ -35,13 +38,13 @@ int main() {
         if (bytesRead != 4) {
             perror("Failed to read from the I2C bus");
         } else {
-            // Decode the 2 int16_t values (big endian)
+            // Decode big-endian int16_t values
             int16_t rpmA = (buffer[0] << 8) | buffer[1];
             int16_t rpmB = (buffer[2] << 8) | buffer[3];
 
-            std::cout << "Read " << i+1 << ": "
-                      << "RPM A = " << rpmA / 100.0
-                      << ", RPM B = " << rpmB / 100.0 << std::endl;
+            std::cout << "Read " << i + 1 << ": "
+                      << "RPM_A = " << rpmA / 100.0
+                      << ", RPM_B = " << rpmB / 100.0 << std::endl;
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
