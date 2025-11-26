@@ -35,8 +35,6 @@ const uint16_t PWMB = 26;
 const uint16_t ANALOG_WRITE_BITS = 8;
 
 int freq = 10000;
-int channel_A = 0;
-int channel_B = 1;
 int resolution = ANALOG_WRITE_BITS;
 
 void initMotors(){
@@ -47,11 +45,9 @@ void initMotors(){
   pinMode(BIN2, OUTPUT);
   pinMode(PWMB, OUTPUT);
 
-  ledcSetup(channel_A, freq, resolution);
-  ledcAttachPin(PWMA, channel_A);
-
-  ledcSetup(channel_B, freq, resolution);
-  ledcAttachPin(PWMB, channel_B);
+  // ledcAttach now merges ledcSetup and ledcAttachPin
+  ledcAttach(PWMA, freq, resolution);
+  ledcAttach(PWMB, freq, resolution);
 }
 
 void motorL(int16_t value){
@@ -65,7 +61,7 @@ void motorL(int16_t value){
     digitalWrite(AIN2, LOW);
     pwm = static_cast<uint16_t>(value);
   }
-  ledcWrite(channel_A, pwm);
+  ledcWrite(PWMA, pwm);
 }
 
 void motorR(int16_t value){
@@ -79,7 +75,7 @@ void motorR(int16_t value){
     digitalWrite(BIN2, LOW);
     pwm = static_cast<uint16_t>(value);
   }
-  ledcWrite(channel_B, pwm);
+  ledcWrite(PWMB, pwm);
 }
 
 void moveF(int16_t vel_l, int16_t vel_r){
@@ -88,8 +84,8 @@ void moveF(int16_t vel_l, int16_t vel_r){
 }
 
 void stopMotors(){
-  ledcWrite(channel_A, 0);
-  ledcWrite(channel_B, 0);
+  ledcWrite(PWMA, 0);
+  ledcWrite(PWMB, 0);
 
   digitalWrite(AIN1, LOW);
   digitalWrite(AIN2, LOW);
@@ -119,7 +115,7 @@ void loop() {
       moveF(motorSpeed.leftSpeed, motorSpeed.rightSpeed);
     } else {
       stopMotors();
-      motorMode == 0x00; // Move to nothing
+      motorMode = 0x00; // Move to nothing
     }
   }
 
